@@ -66,7 +66,7 @@ int main() {
         int choice = CLI::getMenuChoice();
 
 
-        if (choice == 3) {
+        if (choice == 4) {
 
             std::cout
                 << "\nExiting simulator.\n";
@@ -80,18 +80,22 @@ int main() {
 
         if (choice == 1) {
 
-            processes =
-                CLI::inputProcesses();
+    		processes =
+        		CLI::inputProcesses();
 
-        } else if (choice == 2) {
+	} else if (choice == 2) {
 
-            processes =
-                CLI::generateSampleWorkload();
+    		processes =
+        		CLI::loadWorkload();
 
-            std::cout
-                << "\nSample workload loaded.\n";
-        }
+	} else if (choice == 3) {
 
+	    processes =
+        	CLI::generateSampleWorkload();
+
+	    std::cout
+        	<< "\nSample workload loaded.\n";
+	}
 
         std::cout
             << "\nProcesses loaded: "

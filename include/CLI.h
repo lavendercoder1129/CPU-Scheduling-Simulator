@@ -3,6 +3,7 @@
 
 #include "Process.h"
 
+#include <string>
 #include <vector>
 
 class CLI {
@@ -17,8 +18,9 @@ public:
 
     static std::vector<Process> generateSampleWorkload();
 
-    static int getTimeQuantum();
+    static std::vector<Process> loadWorkload();
 
+    static int getTimeQuantum();
 };
 
 #endif

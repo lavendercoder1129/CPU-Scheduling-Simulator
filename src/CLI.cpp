@@ -1,4 +1,5 @@
 #include "CLI.h"
+#include "WorkloadManager.h"
 
 #include <iostream>
 #include <limits>
@@ -21,10 +22,13 @@ void CLI::displayMainMenu() {
         << "1. Enter processes manually\n";
 
     std::cout
-        << "2. Generate sample workload\n";
+        << "2. Load workload from CSV\n";
 
     std::cout
-        << "3. Exit\n";
+        << "3. Generate sample workload\n";
+
+    std::cout
+        << "4. Exit\n";
 
     std::cout
         << "========================================\n";
@@ -41,14 +45,14 @@ int CLI::getMenuChoice() {
 
         if (std::cin >> choice &&
             choice >= 1 &&
-            choice <= 3) {
+            choice <= 4) {
 
             return choice;
         }
 
         std::cout
             << "Invalid choice. "
-            << "Please enter 1, 2, or 3.\n";
+            << "Please enter 1, 2,3 or 4.\n";
 
         std::cin.clear();
 
@@ -234,5 +238,37 @@ int CLI::getTimeQuantum() {
             std::numeric_limits<std::streamsize>::max(),
             '\n'
         );
+    }
+}
+
+std::vector<Process> CLI::loadWorkload() {
+
+    std::string filename;
+
+    std::cout
+        << "\nEnter CSV file path: ";
+
+    std::cin >> filename;
+
+    try {
+
+        std::vector<Process> processes =
+            WorkloadManager::loadFromCSV(filename);
+
+        std::cout
+            << "\nSuccessfully loaded "
+            << processes.size()
+            << " processes.\n";
+
+        return processes;
+
+    } catch (const std::exception& e) {
+
+        std::cout
+            << "\nError loading workload: "
+            << e.what()
+            << "\n";
+
+        return {};
     }
 }

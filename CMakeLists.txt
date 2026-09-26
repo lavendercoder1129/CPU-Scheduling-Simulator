@@ -19,6 +19,7 @@ add_executable(CPUSchedulingSimulator
     src/SchedulingResult.cpp
     src/ComparisonEngine.cpp
     src/CLI.cpp
+    src/WorkloadManager.cpp
 )
 
 target_include_directories(CPUSchedulingSimulator
