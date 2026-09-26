@@ -1,64 +1,65 @@
 #include "FCFSScheduler.h"
+#include "SchedulingResult.h"
+
 #include <algorithm>
-#include <iostream>
-using namespace std;
-void FCFSScheduler :: schedule(vector<Process> &processes){
-	//sort according to arrival time of processes
-	sort(processes.begin(),processes.end(),[](const Process& a, const Process& b){return a.getArrivalTime() < b.getArrivalTime();});
+#include <vector>
 
-	int currentTime = 0;
-	for (auto& process : processes) {
 
-	 	if (currentTime < process.getArrivalTime()) {
-        		currentTime = process.getArrivalTime();
-	   	}   
+SchedulingResult FCFSScheduler::schedule(
+    const std::vector<Process>& inputProcesses) {
 
-    		process.setStartTime(currentTime);
+    std::vector<Process> processes = inputProcesses;
 
-		int startTime = currentTime;
+    GanttChart ganttChart;
 
-		currentTime += process.getBurstTime();
+    std::sort(
+        processes.begin(),
+        processes.end(),
+        [](const Process& a, const Process& b) {
 
-		process.setCompletionTime(currentTime);
+            if (a.getArrivalTime() != b.getArrivalTime()) {
+                return a.getArrivalTime() < b.getArrivalTime();
+            }
 
-		process.setRemainingTime(0);
+            return a.getPid() < b.getPid();
+        }
+    );
 
-		ganttChart.addEntry(
-        		process.getPid(),
-        		startTime,
-        		currentTime
-    		);
-	}
-}
+    int currentTime = 0;
 
-void FCFSScheduler::displayResults(
-    const std::vector<Process>& processes
-) const {
+    for (auto& process : processes) {
 
-    std::cout << "\n";
-    std::cout << "===== FCFS Scheduling =====\n\n";
+        if (currentTime < process.getArrivalTime()) {
+            currentTime = process.getArrivalTime();
+        }
 
-    std::cout
-        << "PID\tAT\tBT\tCT\tTAT\tWT\tRT\n";
+        process.setStartTime(currentTime);
 
-    std::cout
-        << "----------------------------------------"
-        << "----------------\n";
+        int startTime = currentTime;
 
-    for (const auto& process : processes) {
+        currentTime += process.getBurstTime();
 
-        std::cout
-            << "P" << process.getPid() << "\t"
-            << process.getArrivalTime() << "\t"
-            << process.getBurstTime() << "\t"
-            << process.getCompletionTime() << "\t"
-            << process.getTurnaroundTime() << "\t"
-            << process.getWaitingTime() << "\t"
-            << process.getResponseTime()
-            << "\n";
+        process.setCompletionTime(currentTime);
+
+        process.setRemainingTime(0);
+
+        ganttChart.addEntry(
+            process.getPid(),
+            startTime,
+            currentTime
+        );
     }
-}
-void FCFSScheduler::displayGanttChart() const {
-    ganttChart.display();
-}
 
+    int contextSwitches =
+        ganttChart.getEntries().size() > 0
+        ? static_cast<int>(ganttChart.getEntries().size()) - 1
+        : 0;
+
+    return SchedulingResult(
+        "FCFS",
+        processes,
+        ganttChart,
+        currentTime,
+        contextSwitches
+    );
+}

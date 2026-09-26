@@ -43,3 +43,8 @@ void GanttChart::display() const {
 void GanttChart::clear() {
     entries.clear();
 }
+
+
+const std::vector<GanttEntry>&GanttChart::getEntries()const{
+	return entries;
+}

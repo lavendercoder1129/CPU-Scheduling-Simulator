@@ -19,6 +19,8 @@ public:
     void display() const;
 
     void clear();
+
+    const std::vector<GanttEntry>& getEntries() const;
 };
 
 #endif

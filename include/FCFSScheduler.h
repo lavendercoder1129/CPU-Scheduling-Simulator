@@ -5,17 +5,12 @@
 #include "GanttChart.h"
 
 class FCFSScheduler : public Scheduler {
-private:
-    GanttChart ganttChart;
 
 public:
-    void schedule(std::vector<Process>& processes) override;
 
-    void displayResults(
+    SchedulingResult schedule(
         const std::vector<Process>& processes
-    ) const override;
-
-    void displayGanttChart() const;
+    ) override;
 };
 
 #endif

@@ -1,22 +1,30 @@
 #include "PriorityScheduler.h"
+#include "SchedulingResult.h"
 
-#include <iostream>
 #include <vector>
 
-void PriorityScheduler::schedule(
-    std::vector<Process>& processes) {
+
+SchedulingResult PriorityScheduler::schedule(
+    const std::vector<Process>& inputProcesses) {
+
+    std::vector<Process> processes = inputProcesses;
+
+    GanttChart ganttChart;
 
     int currentTime = 0;
     int completed = 0;
+
     int n = processes.size();
 
-    std::vector<bool> completedProcess(n, false);
+    std::vector<bool> completedProcess(
+        n,
+        false
+    );
 
     while (completed < n) {
 
         int selectedIndex = -1;
 
-        // Find highest-priority process among arrived processes
         for (int i = 0; i < n; i++) {
 
             if (completedProcess[i])
@@ -25,16 +33,16 @@ void PriorityScheduler::schedule(
             if (processes[i].getArrivalTime() > currentTime)
                 continue;
 
-            // Lower priority number = higher priority
-            if (selectedIndex == -1 ||
-                processes[i].getPriority() <
-                processes[selectedIndex].getPriority()) {
+            if (
+                selectedIndex == -1 ||
+                processes[i].getPriority()
+                < processes[selectedIndex].getPriority()
+            ) {
 
                 selectedIndex = i;
             }
         }
 
-        // No process has arrived yet
         if (selectedIndex == -1) {
 
             int nextArrival = -1;
@@ -44,8 +52,11 @@ void PriorityScheduler::schedule(
                 if (completedProcess[i])
                     continue;
 
-                if (nextArrival == -1 ||
-                    processes[i].getArrivalTime() < nextArrival) {
+                if (
+                    nextArrival == -1 ||
+                    processes[i].getArrivalTime()
+                    < nextArrival
+                ) {
 
                     nextArrival =
                         processes[i].getArrivalTime();
@@ -53,11 +64,12 @@ void PriorityScheduler::schedule(
             }
 
             currentTime = nextArrival;
+
             continue;
         }
 
-        // Execute selected process
-        Process& process = processes[selectedIndex];
+        Process& process =
+            processes[selectedIndex];
 
         process.setStartTime(currentTime);
 
@@ -69,7 +81,6 @@ void PriorityScheduler::schedule(
 
         process.setRemainingTime(0);
 
-        // Add execution to Gantt chart
         ganttChart.addEntry(
             process.getPid(),
             startTime,
@@ -77,39 +88,20 @@ void PriorityScheduler::schedule(
         );
 
         completedProcess[selectedIndex] = true;
+
         completed++;
     }
-}
 
+    int contextSwitches =
+        ganttChart.getEntries().size() > 0
+        ? static_cast<int>(ganttChart.getEntries().size()) - 1
+        : 0;
 
-void PriorityScheduler::displayResults(
-    const std::vector<Process>& processes) const {
-
-    std::cout << "\n";
-    std::cout << "===== Priority Scheduling =====\n\n";
-
-    std::cout << "PID\tAT\tBT\tP\tCT\tTAT\tWT\tRT\n";
-
-    std::cout
-        << "--------------------------------------------------------\n";
-
-    for (const auto& process : processes) {
-
-        std::cout
-            << "P" << process.getPid() << "\t"
-            << process.getArrivalTime() << "\t"
-            << process.getBurstTime() << "\t"
-            << process.getPriority() << "\t"
-            << process.getCompletionTime() << "\t"
-            << process.getTurnaroundTime() << "\t"
-            << process.getWaitingTime() << "\t"
-            << process.getResponseTime()
-            << "\n";
-    }
-}
-
-
-void PriorityScheduler::displayGanttChart() const {
-
-    ganttChart.display();
+    return SchedulingResult(
+        "Priority",
+        processes,
+        ganttChart,
+        currentTime,
+        contextSwitches
+    );
 }

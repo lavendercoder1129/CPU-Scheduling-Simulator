@@ -14,6 +14,10 @@ add_executable(CPUSchedulingSimulator
     src/PriorityScheduler.cpp
     src/RRScheduler.cpp
     src/MLFQScheduler.cpp
+    src/Statistics.cpp
+    src/StatisticsDisplay.cpp
+    src/SchedulingResult.cpp
+    src/ComparisonEngine.cpp
 )
 
 target_include_directories(CPUSchedulingSimulator

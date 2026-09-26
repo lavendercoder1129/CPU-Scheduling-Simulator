@@ -2,20 +2,14 @@
 #define SJF_SCHEDULER_H
 
 #include "Scheduler.h"
-#include "GanttChart.h"
 
 class SJFScheduler : public Scheduler {
-private:
-    GanttChart ganttChart;
 
 public:
-    void schedule(std::vector<Process>& processes) override;
 
-    void displayResults(
+    SchedulingResult schedule(
         const std::vector<Process>& processes
-    ) const override;
-
-    void displayGanttChart() const;
+    ) override;
 };
 
 #endif

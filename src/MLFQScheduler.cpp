@@ -1,36 +1,49 @@
 #include "MLFQScheduler.h"
+#include "SchedulingResult.h"
 
-#include <iostream>
-#include <vector>
 #include <algorithm>
+#include <queue>
+#include <vector>
 
 
 MLFQScheduler::MLFQScheduler() {
 
     quantum[0] = 2;
     quantum[1] = 4;
-
-    // Queue 2 behaves like FCFS.
     quantum[2] = -1;
 }
 
 
-void MLFQScheduler::schedule(
-    std::vector<Process>& processes) {
+SchedulingResult MLFQScheduler::schedule(
+    const std::vector<Process>& inputProcesses) {
 
-    if (processes.empty())
-        return;
+    std::vector<Process> processes = inputProcesses;
+
+    GanttChart ganttChart;
+
+    if (processes.empty()) {
+
+        return SchedulingResult(
+            "MLFQ",
+            processes,
+            ganttChart,
+            0,
+            0
+        );
+    }
 
     const int n = processes.size();
 
     std::queue<int> queues[QUEUE_COUNT];
 
-    std::vector<bool> addedToQueue(n, false);
+    std::vector<bool> addedToQueue(
+        n,
+        false
+    );
 
     int currentTime = 0;
     int completed = 0;
 
-    // Find earliest arrival time
     int earliestArrival =
         processes[0].getArrivalTime();
 
@@ -45,22 +58,22 @@ void MLFQScheduler::schedule(
 
     currentTime = earliestArrival;
 
-    // Add processes that have already arrived
     for (int i = 0; i < n; i++) {
 
-        if (processes[i].getArrivalTime() <= currentTime) {
+        if (
+            processes[i].getArrivalTime()
+            <= currentTime
+        ) {
 
             queues[0].push(i);
             addedToQueue[i] = true;
         }
     }
 
-
     while (completed < n) {
 
         int selectedQueue = -1;
 
-        // Find the highest-priority non-empty queue
         for (int q = 0; q < QUEUE_COUNT; q++) {
 
             if (!queues[q].empty()) {
@@ -70,8 +83,6 @@ void MLFQScheduler::schedule(
             }
         }
 
-
-        // CPU idle
         if (selectedQueue == -1) {
 
             int nextArrival = -1;
@@ -81,9 +92,11 @@ void MLFQScheduler::schedule(
                 if (addedToQueue[i])
                     continue;
 
-                if (nextArrival == -1 ||
-                    processes[i].getArrivalTime() <
-                    nextArrival) {
+                if (
+                    nextArrival == -1 ||
+                    processes[i].getArrivalTime()
+                    < nextArrival
+                ) {
 
                     nextArrival =
                         processes[i].getArrivalTime();
@@ -92,11 +105,13 @@ void MLFQScheduler::schedule(
 
             currentTime = nextArrival;
 
-            // Add newly arrived processes
             for (int i = 0; i < n; i++) {
 
-                if (!addedToQueue[i] &&
-                    processes[i].getArrivalTime() <= currentTime) {
+                if (
+                    !addedToQueue[i] &&
+                    processes[i].getArrivalTime()
+                    <= currentTime
+                ) {
 
                     queues[0].push(i);
                     addedToQueue[i] = true;
@@ -106,27 +121,23 @@ void MLFQScheduler::schedule(
             continue;
         }
 
-
-        int index = queues[selectedQueue].front();
+        int index =
+            queues[selectedQueue].front();
 
         queues[selectedQueue].pop();
 
-        Process& process = processes[index];
+        Process& process =
+            processes[index];
 
-
-        // Record first response time
         if (process.getStartTime() == -1) {
 
             process.setStartTime(currentTime);
         }
 
-
         int startTime = currentTime;
 
         int executionTime;
 
-
-        // Queue 2 runs until completion
         if (selectedQueue == 2) {
 
             executionTime =
@@ -141,95 +152,64 @@ void MLFQScheduler::schedule(
                 );
         }
 
-
         currentTime += executionTime;
-
 
         process.setRemainingTime(
             process.getRemainingTime()
             - executionTime
         );
 
-
-        // Record execution in Gantt chart
         ganttChart.addEntry(
             process.getPid(),
             startTime,
             currentTime
         );
 
-
-        // Add processes that arrived during execution
         for (int i = 0; i < n; i++) {
 
-            if (!addedToQueue[i] &&
-                processes[i].getArrivalTime() <= currentTime) {
+            if (
+                !addedToQueue[i] &&
+                processes[i].getArrivalTime()
+                <= currentTime
+            ) {
 
                 queues[0].push(i);
                 addedToQueue[i] = true;
             }
         }
 
-
-        // Process completed
         if (process.getRemainingTime() == 0) {
 
-            process.setCompletionTime(currentTime);
+            process.setCompletionTime(
+                currentTime
+            );
 
             completed++;
 
         } else {
 
-            // Move process down one level
             if (selectedQueue < QUEUE_COUNT - 1) {
 
-                queues[selectedQueue + 1].push(index);
+                queues[selectedQueue + 1]
+                    .push(index);
 
             } else {
 
-                // Remain in lowest queue
                 queues[2].push(index);
             }
         }
     }
-}
 
+    int contextSwitches =
+        ganttChart.getEntries().size() > 0
+        ? static_cast<int>(ganttChart.getEntries().size()) - 1
+        : 0;
 
-void MLFQScheduler::displayResults(
-    const std::vector<Process>& processes) const {
-
-    std::cout << "\n";
-    std::cout << "===== MLFQ Scheduling =====\n\n";
-
-    std::cout << "Queue Configuration:\n";
-    std::cout << "Queue 0 -> Quantum = 2\n";
-    std::cout << "Queue 1 -> Quantum = 4\n";
-    std::cout << "Queue 2 -> FCFS\n\n";
-
-
-    std::cout
-        << "PID\tAT\tBT\tCT\tTAT\tWT\tRT\n";
-
-    std::cout
-        << "------------------------------------------------\n";
-
-
-    for (const auto& process : processes) {
-
-        std::cout
-            << "P" << process.getPid() << "\t"
-            << process.getArrivalTime() << "\t"
-            << process.getBurstTime() << "\t"
-            << process.getCompletionTime() << "\t"
-            << process.getTurnaroundTime() << "\t"
-            << process.getWaitingTime() << "\t"
-            << process.getResponseTime()
-            << "\n";
-    }
-}
-
-
-void MLFQScheduler::displayGanttChart() const {
-
-    ganttChart.display();
+    return SchedulingResult(
+        "MLFQ",
+        processes,
+        ganttChart,
+        currentTime,
+        contextSwitches
+    );
 }
