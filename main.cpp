@@ -2,18 +2,20 @@
 #include <vector>
 
 #include "Process.h"
-#include "PriorityScheduler.h"
+#include "RRScheduler.h"
 
 int main() {
 
     std::vector<Process> processes;
 
-    processes.emplace_back(1, 0, 7, 3);
-    processes.emplace_back(2, 2, 4, 1);
-    processes.emplace_back(3, 3, 2, 4);
-    processes.emplace_back(4, 4, 1, 2);
+    processes.emplace_back(1, 0, 5, 1);
+    processes.emplace_back(2, 1, 4, 2);
+    processes.emplace_back(3, 2, 2, 3);
+    processes.emplace_back(4, 3, 1, 4);
 
-    PriorityScheduler scheduler;
+    int timeQuantum = 2;
+
+    RRScheduler scheduler(timeQuantum);
 
     scheduler.schedule(processes);
 
