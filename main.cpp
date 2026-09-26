@@ -1,34 +1,22 @@
 #include <iostream>
 #include <vector>
-
+using namespace std;
 #include "Process.h"
-#include "Scheduler.h"
-
-class TestScheduler : public Scheduler {
-public:
-
-    void schedule(std::vector<Process>& processes) override {
-        std::cout << "Test scheduler executed.\n";
-    }
-
-    void displayResults(
-        const std::vector<Process>& processes
-    ) const override {
-        std::cout << "Displaying results.\n";
-    }
-};
+#include "FCFSScheduler.h"
 
 int main() {
 
-    std::vector<Process> processes;
+    vector<Process> processes;
 
     processes.emplace_back(1, 0, 5, 2);
     processes.emplace_back(2, 1, 3, 1);
+    processes.emplace_back(3, 2, 4, 3);
 
-    TestScheduler scheduler;
+    FCFSScheduler fcfs;
 
-    scheduler.schedule(processes);
-    scheduler.displayResults(processes);
+    fcfs.schedule(processes);
+
+    fcfs.displayResults(processes);
 
     return 0;
 }

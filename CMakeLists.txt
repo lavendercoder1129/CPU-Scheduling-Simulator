@@ -5,9 +5,13 @@ project(CPUSchedulingSimulator)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
-
 add_executable(CPUSchedulingSimulator
     main.cpp
     src/Process.cpp
+    src/FCFSScheduler.cpp
+)
+
+target_include_directories(CPUSchedulingSimulator
+    PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
 )
