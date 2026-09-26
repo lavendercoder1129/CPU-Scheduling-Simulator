@@ -2,24 +2,24 @@
 #include <vector>
 
 #include "Process.h"
-#include "SJFScheduler.h"
+#include "PriorityScheduler.h"
 
 int main() {
 
     std::vector<Process> processes;
 
-    processes.emplace_back(1, 0, 7, 2);
+    processes.emplace_back(1, 0, 7, 3);
     processes.emplace_back(2, 2, 4, 1);
-    processes.emplace_back(3, 3, 2, 3);
+    processes.emplace_back(3, 3, 2, 4);
     processes.emplace_back(4, 4, 1, 2);
 
-    SJFScheduler sjf;
+    PriorityScheduler scheduler;
 
-    sjf.schedule(processes);
+    scheduler.schedule(processes);
 
-    sjf.displayResults(processes);
+    scheduler.displayResults(processes);
 
-    sjf.displayGanttChart();
+    scheduler.displayGanttChart();
 
     return 0;
 }

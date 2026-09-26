@@ -11,6 +11,7 @@ add_executable(CPUSchedulingSimulator
     src/FCFSScheduler.cpp
     src/GanttChart.cpp
     src/SJFScheduler.cpp
+    src/PriorityScheduler.cpp
 )
 
 target_include_directories(CPUSchedulingSimulator
