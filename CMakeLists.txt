@@ -13,6 +13,7 @@ add_executable(CPUSchedulingSimulator
     src/SJFScheduler.cpp
     src/PriorityScheduler.cpp
     src/RRScheduler.cpp
+    src/MLFQScheduler.cpp
 )
 
 target_include_directories(CPUSchedulingSimulator
