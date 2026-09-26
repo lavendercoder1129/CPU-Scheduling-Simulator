@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
-using namespace std;
+
 #include "Process.h"
 #include "FCFSScheduler.h"
 
 int main() {
 
-    vector<Process> processes;
+    std::vector<Process> processes;
 
     processes.emplace_back(1, 0, 5, 2);
     processes.emplace_back(2, 1, 3, 1);
@@ -17,6 +17,8 @@ int main() {
     fcfs.schedule(processes);
 
     fcfs.displayResults(processes);
+
+    fcfs.displayGanttChart();
 
     return 0;
 }

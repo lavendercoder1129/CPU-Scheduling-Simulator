@@ -7,19 +7,27 @@ void FCFSScheduler :: schedule(vector<Process> &processes){
 	sort(processes.begin(),processes.end(),[](const Process& a, const Process& b){return a.getArrivalTime() < b.getArrivalTime();});
 
 	int currentTime = 0;
-	for(auto &process : processes){
-	//cpu  idle if no processarrived
-		if(currentTime < process.getArrivalTime()){
-			currentTime = process.getArrivalTime();		
-		}
-		//first process gets cpu
-		process.setStartTime(currentTime);
-		//execute process
-		currentTime +=  process.getBurstTime();
-		//process finshes
+	for (auto& process : processes) {
+
+	 	if (currentTime < process.getArrivalTime()) {
+        		currentTime = process.getArrivalTime();
+	   	}   
+
+    		process.setStartTime(currentTime);
+
+		int startTime = currentTime;
+
+		currentTime += process.getBurstTime();
+
 		process.setCompletionTime(currentTime);
-		//process has no rem cpu time
+
 		process.setRemainingTime(0);
+
+		ganttChart.addEntry(
+        		process.getPid(),
+        		startTime,
+        		currentTime
+    		);
 	}
 }
 
@@ -50,3 +58,7 @@ void FCFSScheduler::displayResults(
             << "\n";
     }
 }
+void FCFSScheduler::displayGanttChart() const {
+    ganttChart.display();
+}
+
