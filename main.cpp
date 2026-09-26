@@ -11,25 +11,12 @@
 #include "MLFQScheduler.h"
 
 #include "ComparisonEngine.h"
+#include "CLI.h"
 
 
-int main() {
-
-    // --------------------------------------------------
-    // Input workload
-    // --------------------------------------------------
-
-    std::vector<Process> processes;
-
-    processes.emplace_back(1, 0, 8, 3);
-    processes.emplace_back(2, 1, 4, 1);
-    processes.emplace_back(3, 2, 2, 4);
-    processes.emplace_back(4, 3, 6, 2);
-
-
-    // --------------------------------------------------
-    // Create schedulers
-    // --------------------------------------------------
+std::vector<SchedulingResult> runAllAlgorithms(
+    const std::vector<Process>& processes,
+    int timeQuantum) {
 
     FCFSScheduler fcfs;
 
@@ -37,16 +24,13 @@ int main() {
 
     PriorityScheduler priority;
 
-    RRScheduler roundRobin(2);
+    RRScheduler roundRobin(timeQuantum);
 
     MLFQScheduler mlfq;
 
 
-    // --------------------------------------------------
-    // Run all algorithms
-    // --------------------------------------------------
-
     std::vector<SchedulingResult> results;
+
 
     results.push_back(
         fcfs.schedule(processes)
@@ -69,13 +53,67 @@ int main() {
     );
 
 
-    // --------------------------------------------------
-    // Display comparison
-    // --------------------------------------------------
+    return results;
+}
 
-    ComparisonEngine::displayComparison(
-        results
-    );
+
+int main() {
+
+    while (true) {
+
+        CLI::displayMainMenu();
+
+        int choice = CLI::getMenuChoice();
+
+
+        if (choice == 3) {
+
+            std::cout
+                << "\nExiting simulator.\n";
+
+            break;
+        }
+
+
+        std::vector<Process> processes;
+
+
+        if (choice == 1) {
+
+            processes =
+                CLI::inputProcesses();
+
+        } else if (choice == 2) {
+
+            processes =
+                CLI::generateSampleWorkload();
+
+            std::cout
+                << "\nSample workload loaded.\n";
+        }
+
+
+        std::cout
+            << "\nProcesses loaded: "
+            << processes.size()
+            << "\n";
+
+
+        int timeQuantum =
+            CLI::getTimeQuantum();
+
+
+        std::vector<SchedulingResult> results =
+            runAllAlgorithms(
+                processes,
+                timeQuantum
+            );
+
+
+        ComparisonEngine::displayComparison(
+            results
+        );
+    }
 
 
     return 0;
