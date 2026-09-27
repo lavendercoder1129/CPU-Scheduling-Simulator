@@ -36,7 +36,21 @@ SchedulingResult PriorityScheduler::schedule(
             if (
                 selectedIndex == -1 ||
                 processes[i].getPriority()
-                < processes[selectedIndex].getPriority()
+                < processes[selectedIndex].getPriority() ||
+                (
+                    processes[i].getPriority()
+                    == processes[selectedIndex].getPriority() &&
+                    processes[i].getArrivalTime()
+                    < processes[selectedIndex].getArrivalTime()
+                ) ||
+                (
+                    processes[i].getPriority()
+                    == processes[selectedIndex].getPriority() &&
+                    processes[i].getArrivalTime()
+                    == processes[selectedIndex].getArrivalTime() &&
+                    processes[i].getPid()
+                    < processes[selectedIndex].getPid()
+                )
             ) {
 
                 selectedIndex = i;

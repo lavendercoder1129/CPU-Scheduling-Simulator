@@ -36,6 +36,8 @@ add_executable(CPUSchedulingSimulator
 
     src/CLI.cpp
     src/WorkloadManager.cpp
+
+  
 )
 
 target_include_directories(
@@ -57,7 +59,10 @@ add_executable(SchedulingTests
     tests/test_rr.cpp
     tests/test_mlfq.cpp
     tests/test_idle_time.cpp
+    tests/test_idle_gap.cpp
+    tests/test_edge_cases.cpp
 
+    
     src/Process.cpp
 
     src/FCFSScheduler.cpp

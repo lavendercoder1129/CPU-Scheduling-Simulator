@@ -11,26 +11,22 @@
 #include "MLFQScheduler.h"
 
 #include "ComparisonEngine.h"
+#include "StatisticsDisplay.h"
 #include "CLI.h"
 
 
 std::vector<SchedulingResult> runAllAlgorithms(
     const std::vector<Process>& processes,
-    int timeQuantum) {
+    int timeQuantum
+) {
 
     FCFSScheduler fcfs;
-
     SJFScheduler sjf;
-
     PriorityScheduler priority;
-
     RRScheduler roundRobin(timeQuantum);
-
     MLFQScheduler mlfq;
 
-
     std::vector<SchedulingResult> results;
-
 
     results.push_back(
         fcfs.schedule(processes)
@@ -52,8 +48,68 @@ std::vector<SchedulingResult> runAllAlgorithms(
         mlfq.schedule(processes)
     );
 
-
     return results;
+}
+
+
+void displayDetailedResults(
+    const std::vector<SchedulingResult>& results
+) {
+
+    for (const auto& result : results) {
+
+        std::cout
+            << "\n\n========================================\n";
+
+        std::cout
+            << "        "
+            << result.getAlgorithmName()
+            << "\n";
+
+        std::cout
+            << "========================================\n";
+
+        /*
+         * Gantt Chart
+         */
+        result.getGanttChart().display();
+
+        /*
+         * Per-process metrics
+         */
+        StatisticsDisplay::displayProcessMetrics(
+            result.getProcesses()
+        );
+
+        /*
+         * Scheduling statistics
+         */
+        StatisticsDisplay::display(
+            result.getStatistics()
+        );
+
+	const GanttChart& chart =
+    		result.getGanttChart();
+
+	std::cout
+    		<< "\n===== CPU Time Analysis =====\n\n";
+
+	std::cout
+    		<< "CPU Busy Time           : "
+    		<< chart.getBusyTime()
+    		<< "\n";
+
+	std::cout
+    		<< "CPU Idle Time           : "
+    		<< chart.getIdleTime()
+    		<< "\n";
+
+	std::cout
+    		<< "Elapsed Simulation Time : "
+    		<< chart.getElapsedTime()
+    		<< "\n";
+
+    }
 }
 
 
@@ -63,8 +119,8 @@ int main() {
 
         CLI::displayMainMenu();
 
-        int choice = CLI::getMenuChoice();
-
+        int choice =
+            CLI::getMenuChoice();
 
         if (choice == 4) {
 
@@ -74,51 +130,79 @@ int main() {
             break;
         }
 
-
         std::vector<Process> processes;
 
-
+        /*
+         * Manual workload
+         */
         if (choice == 1) {
 
-    		processes =
-        		CLI::inputProcesses();
+            processes =
+                CLI::inputProcesses();
+        }
 
-	} else if (choice == 2) {
+        /*
+         * CSV workload
+         */
+        else if (choice == 2) {
 
-    		processes =
-        		CLI::loadWorkload();
+            processes =
+                CLI::loadWorkload();
+        }
 
-	} else if (choice == 3) {
+        /*
+         * Sample workload
+         */
+        else if (choice == 3) {
 
-	    processes =
-        	CLI::generateSampleWorkload();
+            processes =
+                CLI::generateSampleWorkload();
 
-	    std::cout
-        	<< "\nSample workload loaded.\n";
-	}
+            std::cout
+                << "\nSample workload loaded.\n";
+        }
+
+        /*
+         * Safety check
+         */
+        if (processes.empty()) {
+
+            std::cout
+                << "\nNo processes loaded.\n";
+
+            continue;
+        }
 
         std::cout
             << "\nProcesses loaded: "
             << processes.size()
             << "\n";
 
-
         int timeQuantum =
             CLI::getTimeQuantum();
 
-
+        /*
+         * Run all scheduling algorithms.
+         */
         std::vector<SchedulingResult> results =
             runAllAlgorithms(
                 processes,
                 timeQuantum
             );
 
+        /*
+         * Display detailed results
+         * for every algorithm.
+         */
+        displayDetailedResults(results);
 
+        /*
+         * Display comparison table.
+         */
         ComparisonEngine::displayComparison(
             results
         );
     }
-
 
     return 0;
 }
