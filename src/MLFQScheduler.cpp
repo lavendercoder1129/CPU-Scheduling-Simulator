@@ -5,7 +5,6 @@
 #include <queue>
 #include <vector>
 
-
 MLFQScheduler::MLFQScheduler() {
 
     quantum[0] = 2;
@@ -44,6 +43,10 @@ SchedulingResult MLFQScheduler::schedule(
     int currentTime = 0;
     int completed = 0;
 
+    /*
+     * Add initial CPU idle time if the first process
+     * arrives after time 0.
+     */
     int earliestArrival =
         processes[0].getArrivalTime();
 
@@ -56,8 +59,21 @@ SchedulingResult MLFQScheduler::schedule(
             );
     }
 
-    currentTime = earliestArrival;
+    if (currentTime < earliestArrival) {
 
+        ganttChart.addEntry(
+            -1,
+            currentTime,
+            earliestArrival
+        );
+
+        currentTime = earliestArrival;
+    }
+
+    /*
+     * Add all processes that have arrived
+     * to the highest-priority queue.
+     */
     for (int i = 0; i < n; i++) {
 
         if (
@@ -74,7 +90,15 @@ SchedulingResult MLFQScheduler::schedule(
 
         int selectedQueue = -1;
 
-        for (int q = 0; q < QUEUE_COUNT; q++) {
+        /*
+         * Always select the highest-priority
+         * non-empty queue.
+         */
+        for (
+            int q = 0;
+            q < QUEUE_COUNT;
+            q++
+        ) {
 
             if (!queues[q].empty()) {
 
@@ -83,6 +107,11 @@ SchedulingResult MLFQScheduler::schedule(
             }
         }
 
+        /*
+         * No process is currently ready.
+         * Advance to the next process arrival
+         * and record CPU idle time.
+         */
         if (selectedQueue == -1) {
 
             int nextArrival = -1;
@@ -103,8 +132,24 @@ SchedulingResult MLFQScheduler::schedule(
                 }
             }
 
-            currentTime = nextArrival;
+            if (
+                nextArrival != -1 &&
+                currentTime < nextArrival
+            ) {
 
+                ganttChart.addEntry(
+                    -1,
+                    currentTime,
+                    nextArrival
+                );
+
+                currentTime = nextArrival;
+            }
+
+            /*
+             * Add all processes that have now arrived
+             * to Queue 0.
+             */
             for (int i = 0; i < n; i++) {
 
                 if (
@@ -129,6 +174,10 @@ SchedulingResult MLFQScheduler::schedule(
         Process& process =
             processes[index];
 
+        /*
+         * Response time is based on the first
+         * time the process gets CPU.
+         */
         if (process.getStartTime() == -1) {
 
             process.setStartTime(currentTime);
@@ -138,6 +187,10 @@ SchedulingResult MLFQScheduler::schedule(
 
         int executionTime;
 
+        /*
+         * Queue 2 is the lowest-priority queue
+         * and runs processes until completion.
+         */
         if (selectedQueue == 2) {
 
             executionTime =
@@ -159,12 +212,18 @@ SchedulingResult MLFQScheduler::schedule(
             - executionTime
         );
 
+        /*
+         * Record this CPU execution segment.
+         */
         ganttChart.addEntry(
             process.getPid(),
             startTime,
             currentTime
         );
 
+        /*
+         * Add newly arrived processes to Queue 0.
+         */
         for (int i = 0; i < n; i++) {
 
             if (
@@ -178,6 +237,9 @@ SchedulingResult MLFQScheduler::schedule(
             }
         }
 
+        /*
+         * Process has finished.
+         */
         if (process.getRemainingTime() == 0) {
 
             process.setCompletionTime(
@@ -188,22 +250,31 @@ SchedulingResult MLFQScheduler::schedule(
 
         } else {
 
-            if (selectedQueue < QUEUE_COUNT - 1) {
+            /*
+             * Process did not finish.
+             * Demote it to the next queue.
+             */
+            if (
+                selectedQueue
+                < QUEUE_COUNT - 1
+            ) {
 
                 queues[selectedQueue + 1]
                     .push(index);
 
             } else {
 
+                /*
+                 * Already in the lowest queue.
+                 * Keep it there.
+                 */
                 queues[2].push(index);
             }
         }
     }
 
     int contextSwitches =
-        ganttChart.getEntries().size() > 0
-        ? static_cast<int>(ganttChart.getEntries().size()) - 1
-        : 0;
+        ganttChart.getContextSwitchCount();
 
     return SchedulingResult(
         "MLFQ",

@@ -1,13 +1,10 @@
 #include "Statistics.h"
 
-#include <numeric>
-
-
 SchedulingStatistics Statistics::calculate(
     const std::vector<Process>& processes,
     int totalTime,
-    int contextSwitches) {
-
+    int contextSwitches
+) {
     SchedulingStatistics stats{};
 
     if (processes.empty() || totalTime <= 0) {
@@ -21,21 +18,14 @@ SchedulingStatistics Statistics::calculate(
     int totalBurstTime = 0;
 
     for (const auto& process : processes) {
-
-        totalWaitingTime +=
-            process.getWaitingTime();
-
-        totalTurnaroundTime +=
-            process.getTurnaroundTime();
-
-        totalResponseTime +=
-            process.getResponseTime();
-
-        totalBurstTime +=
-            process.getBurstTime();
+        totalWaitingTime += process.getWaitingTime();
+        totalTurnaroundTime += process.getTurnaroundTime();
+        totalResponseTime += process.getResponseTime();
+        totalBurstTime += process.getBurstTime();
     }
 
-    int processCount = processes.size();
+    const double processCount =
+        static_cast<double>(processes.size());
 
     stats.averageWaitingTime =
         totalWaitingTime / processCount;
@@ -47,15 +37,14 @@ SchedulingStatistics Statistics::calculate(
         totalResponseTime / processCount;
 
     stats.cpuUtilization =
-        (static_cast<double>(totalBurstTime)
-        / totalTime) * 100.0;
+        (static_cast<double>(totalBurstTime) /
+         static_cast<double>(totalTime)) * 100.0;
 
     stats.throughput =
-        static_cast<double>(processCount)
-        / totalTime;
+        processCount / static_cast<double>(totalTime);
 
-    stats.contextSwitches =
-        contextSwitches;
+    stats.contextSwitches = contextSwitches;
 
     return stats;
 }
+

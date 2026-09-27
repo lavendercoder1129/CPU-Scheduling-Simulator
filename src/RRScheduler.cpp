@@ -5,11 +5,9 @@
 #include <queue>
 #include <vector>
 
-
 RRScheduler::RRScheduler(int quantum)
     : timeQuantum(quantum) {
 }
-
 
 SchedulingResult RRScheduler::schedule(
     const std::vector<Process>& inputProcesses) {
@@ -19,7 +17,6 @@ SchedulingResult RRScheduler::schedule(
     GanttChart ganttChart;
 
     if (processes.empty()) {
-
         return SchedulingResult(
             "Round Robin",
             processes,
@@ -41,34 +38,23 @@ SchedulingResult RRScheduler::schedule(
     int currentTime = 0;
     int completed = 0;
 
-    int earliestArrival =
-        processes[0].getArrivalTime();
-
-    for (int i = 1; i < n; i++) {
-
-        earliestArrival =
-            std::min(
-                earliestArrival,
-                processes[i].getArrivalTime()
-            );
-    }
-
-    currentTime = earliestArrival;
-
-    for (int i = 0; i < n; i++) {
-
-        if (
-            processes[i].getArrivalTime()
-            <= currentTime
-        ) {
-
-            readyQueue.push(i);
-            addedToQueue[i] = true;
-        }
-    }
-
     while (completed < n) {
 
+        // Add all processes that have arrived.
+        for (int i = 0; i < n; i++) {
+
+            if (
+                !addedToQueue[i] &&
+                processes[i].getArrivalTime()
+                <= currentTime
+            ) {
+
+                readyQueue.push(i);
+                addedToQueue[i] = true;
+            }
+        }
+
+        // If no process is ready, CPU is idle.
         if (readyQueue.empty()) {
 
             int nextArrival = -1;
@@ -89,19 +75,18 @@ SchedulingResult RRScheduler::schedule(
                 }
             }
 
-            currentTime = nextArrival;
+            if (
+                nextArrival != -1 &&
+                currentTime < nextArrival
+            ) {
 
-            for (int i = 0; i < n; i++) {
+                ganttChart.addEntry(
+                    -1,
+                    currentTime,
+                    nextArrival
+                );
 
-                if (
-                    !addedToQueue[i] &&
-                    processes[i].getArrivalTime()
-                    <= currentTime
-                ) {
-
-                    readyQueue.push(i);
-                    addedToQueue[i] = true;
-                }
+                currentTime = nextArrival;
             }
 
             continue;
@@ -115,7 +100,6 @@ SchedulingResult RRScheduler::schedule(
             processes[index];
 
         if (process.getStartTime() == -1) {
-
             process.setStartTime(currentTime);
         }
 
@@ -140,6 +124,7 @@ SchedulingResult RRScheduler::schedule(
             currentTime
         );
 
+        // Add processes that arrived during this time slice.
         for (int i = 0; i < n; i++) {
 
             if (
@@ -168,9 +153,7 @@ SchedulingResult RRScheduler::schedule(
     }
 
     int contextSwitches =
-        ganttChart.getEntries().size() > 0
-        ? static_cast<int>(ganttChart.getEntries().size()) - 1
-        : 0;
+        ganttChart.getContextSwitchCount();
 
     return SchedulingResult(
         "Round Robin",

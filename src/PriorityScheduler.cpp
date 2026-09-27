@@ -65,7 +65,17 @@ SchedulingResult PriorityScheduler::schedule(
 
             currentTime = nextArrival;
 
-            continue;
+         if (currentTime < nextArrival) {
+    		ganttChart.addEntry(
+        		-1,
+        		currentTime,
+        		nextArrival
+    		);
+
+    		currentTime = nextArrival;
+	 }
+
+           continue;
         }
 
         Process& process =
@@ -92,10 +102,7 @@ SchedulingResult PriorityScheduler::schedule(
         completed++;
     }
 
-    int contextSwitches =
-        ganttChart.getEntries().size() > 0
-        ? static_cast<int>(ganttChart.getEntries().size()) - 1
-        : 0;
+    int contextSwitches = ganttChart.getContextSwitchCount();
 
     return SchedulingResult(
         "Priority",

@@ -21,6 +21,18 @@ public:
     void clear();
 
     const std::vector<GanttEntry>& getEntries() const;
+
+    int getBusyTime() const;
+
+    int getSimulationStart() const;
+
+    int getSimulationEnd() const;
+
+    int getElapsedTime() const;
+
+    int getIdleTime() const;
+
+    int getContextSwitchCount() const;
 };
 
 #endif

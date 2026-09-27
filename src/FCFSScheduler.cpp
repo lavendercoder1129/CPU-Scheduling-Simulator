@@ -30,8 +30,10 @@ SchedulingResult FCFSScheduler::schedule(
     for (auto& process : processes) {
 
         if (currentTime < process.getArrivalTime()) {
-            currentTime = process.getArrivalTime();
-        }
+            ganttChart.addEntry(-1,currentTime,process.getArrivalTime());
+	    currentTime =   process.getArrivalTime();        
+	}
+	
 
         process.setStartTime(currentTime);
 
@@ -50,10 +52,7 @@ SchedulingResult FCFSScheduler::schedule(
         );
     }
 
-    int contextSwitches =
-        ganttChart.getEntries().size() > 0
-        ? static_cast<int>(ganttChart.getEntries().size()) - 1
-        : 0;
+    int contextSwitches = ganttChart.getContextSwitchCount();
 
     return SchedulingResult(
         "FCFS",

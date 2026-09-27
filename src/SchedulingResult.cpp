@@ -1,6 +1,5 @@
 #include "SchedulingResult.h"
 
-
 SchedulingResult::SchedulingResult(
     const std::string& algorithmName,
     const std::vector<Process>& processes,
@@ -11,53 +10,36 @@ SchedulingResult::SchedulingResult(
     : algorithmName(algorithmName),
       processes(processes),
       ganttChart(ganttChart),
-      totalTime(totalTime),
-      contextSwitches(contextSwitches) {
+      totalTime(ganttChart.getElapsedTime()),
+      contextSwitches(ganttChart.getContextSwitchCount()) {
 
-    statistics =
-        Statistics::calculate(
-            this->processes,
-            totalTime,
-            contextSwitches
-        );
+    statistics = Statistics::calculate(
+        this->processes,
+        this->totalTime,
+        this->contextSwitches
+    );
 }
 
-
-const std::string&
-SchedulingResult::getAlgorithmName() const {
-
+const std::string& SchedulingResult::getAlgorithmName() const {
     return algorithmName;
 }
 
-
-const std::vector<Process>&
-SchedulingResult::getProcesses() const {
-
+const std::vector<Process>& SchedulingResult::getProcesses() const {
     return processes;
 }
 
-
-const GanttChart&
-SchedulingResult::getGanttChart() const {
-
+const GanttChart& SchedulingResult::getGanttChart() const {
     return ganttChart;
 }
 
-
-const SchedulingStatistics&
-SchedulingResult::getStatistics() const {
-
+const SchedulingStatistics& SchedulingResult::getStatistics() const {
     return statistics;
 }
 
-
 int SchedulingResult::getTotalTime() const {
-
     return totalTime;
 }
 
-
 int SchedulingResult::getContextSwitches() const {
-
     return contextSwitches;
 }

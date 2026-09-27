@@ -63,7 +63,15 @@ SchedulingResult SJFScheduler::schedule(
                 }
             }
 
-            currentTime = nextArrival;
+	    if (currentTime < nextArrival) {
+    	        ganttChart.addEntry(
+           	    -1,
+            	    currentTime,
+        	    nextArrival
+    	        );
+
+     		currentTime = nextArrival;
+	    }
 
             continue;
         }
@@ -92,10 +100,7 @@ SchedulingResult SJFScheduler::schedule(
         completed++;
     }
 
-    int contextSwitches =
-        ganttChart.getEntries().size() > 0
-        ? static_cast<int>(ganttChart.getEntries().size()) - 1
-        : 0;
+    int contextSwitches = ganttChart.getContextSwitchCount();
 
     return SchedulingResult(
         "SJF",
